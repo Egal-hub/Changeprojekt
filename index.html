@@ -1,0 +1,110 @@
+<!DOCTYPE html><script src="jspdf.debug.js"></script><script src="jspdf.plugin.autotable.js"></script>
+<style>
+ html, body {
+ margin: 0; overflow: hidden;
+ }
+</style>
+<script>
+var b = [];
+var d = [];
+var g = true;
+var h = '';
+var i = true;
+var j = 0;
+var k = '';
+function c() {
+  m = document.getElementById('a')
+  var element = document.getElementById("A");
+  var datei = element.files[0];
+  var reader=new FileReader();
+  reader.readAsText(datei);
+  reader.onload = function(){
+   var a = reader.result;
+   var e = '';
+   for (var f = 0; f<a.length; f++) {
+    e += a.charCodeAt(f).toString(2).padStart(8,'0');
+   };
+   for (var f = 0; f<e.length; f++) {
+    if (i) {
+     if (g) {
+      g = false;
+      h=e[f]+h;
+     }
+     else {
+      if (e[f] == '1') {
+       b.push(parseInt(h,2));
+       h = ''
+       i = false;
+      }
+      else
+       g = true;
+     };
+    }
+    else {
+     if (g) {
+      j++;
+      k+=e[f];
+      if (j==8) {
+       j = 0;
+       h+=String.fromCharCode(parseInt(k,2));
+       k = '';
+       g = false;
+      }
+     }
+     else {
+      j++;
+      if (j==2) {
+       j = 0;
+       g = true;
+       i = true;
+       if (e[f] == '1')
+        break;
+      }
+      else {
+       if (e[f] == '1') {
+        d.push(h);
+        h = '';
+       }
+       else {
+        g = true;
+        j = 0;
+       }
+      }
+     };
+    }
+   };
+   element.remove();
+   m.innerHTML = '<input oninput="n()" type="range" id="e" value="0" min="0" max="' + String(b.length-2) + '"><button id="d" onclick="download()">Als pdf herunterladen</button>' + m.innerHTML;
+   o = document.getElementById("e");
+   console.log(o);
+  }
+}
+function n() {
+ var l = 0;
+ var f = b.slice().copyWithin(0,1);
+ f.length -= 1;
+ for (var e = 0; e < o.value; e++){
+  for (var c = 1; c < f.length; c++) {
+   if (Math.abs(f[c] - b[0]) > Math.abs(f[l] - b[0]))
+    var l = c;
+  }
+  f.splice(l, 1);
+  l = 0;
+ }
+ for (var c = 0; c < f.length; c++) {
+  l += f[c];
+ };
+ document.getElementById('b').innerHTML='Die '+String(o.value)+' schlechtesten Schätzungen wurden rausgeschmissen.<br>Das Ergebnis ist '+String(l/f.length)+'.<br>'+String(b[0])+' war es wirklich.';
+}
+function download() {
+ console.log(0);
+ var C = new jsPDF();
+ console.log(1);
+ var R = [];
+ for (var e = 1; e < b.length; e++)
+  R.push({"col1": b[e].toString(),"col2": d[e]});
+ C.autoTable([{ title: b[0].toString(), dataKey: "col1" },{ title: d[0], dataKey: "col2" }],R);
+ m.innerHTML += '<input id="c" type="number" min="1" value="1"><br><object id="B" data="' + C.output('bloburl') + '" type="application/pdf" width="100%" height="' + (window.innerHeight - m.offsetHeight).toString(10) + '">';
+ o = document.getElementById("e");
+}
+</script><div id="a"><input type='file' id='A' onchange='c()'><label id="b"><br><br></label></div>
